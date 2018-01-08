@@ -41,7 +41,7 @@ hexo server #启动本地服务器, 默认端口4000, 因此可以在(localhost:
 ```
 #克隆最新版本
 cd MyBlog  #进入我的博客目录
-git clone https://github.com/iissnan/hexo-theme-next themes/next
+git clone https://github.com/theme-next/hexo-theme-next.git themes/next
 
 #修改主题配置文件
 ## Themes: https://hexo.io/themes/

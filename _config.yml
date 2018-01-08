@@ -3,16 +3,16 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
-subtitle:
-description:
-author: John Doe
-language:
+title: Carry CA
+subtitle: I'll try
+description: 和世界交手的这许多年 <br>你是否光彩依旧，兴致盎然
+author: 丁国航
+language: zh-Hans
 timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
+url: http://www.carryca.com
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
