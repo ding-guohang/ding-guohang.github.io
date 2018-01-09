@@ -88,7 +88,7 @@
 <meta property="og:site_name" content="Carry CA">
 <meta property="og:description" content="关于我如何搭建了自己的个人博客，以及遇到的一些奇怪的问题。resources: hexo中文官网 &amp;amp; next主题中文官网">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-01-08T12:28:36.894Z">
+<meta property="og:updated_time" content="2018-01-09T05:49:22.763Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="个人博客搭建">
 <meta name="twitter:description" content="关于我如何搭建了自己的个人博客，以及遇到的一些奇怪的问题。resources: hexo中文官网 &amp;amp; next主题中文官网">
@@ -393,14 +393,15 @@
 <li><p>修改站点配置文件，将功能部署在master分支</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repo: https://github.com/ding-guohang/ding-guohang.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
 </li>
-<li><p>建议将源码保留在另一个分支，例如code<br>···<br>git init<br>git checkout -b code<br>git add .<br>git commit -m “init code branch for codes”<br>git push –set-upstream origin code<br>···</p>
+<li><p>建议将源码保留在另一个分支，例如code</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">git init</span><br><span class="line">git checkout -b code</span><br><span class="line">git add .</span><br><span class="line">git commit -m <span class="string">"init code branch for codes"</span></span><br><span class="line">git push --<span class="built_in">set</span>-upstream origin code</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 <h1 id="绑定域名"><a href="#绑定域名" class="headerlink" title="绑定域名"></a>绑定域名</h1><ul>
 <li>我是学前辈在<a href="https://www.godaddy.com/" target="_blank" rel="noopener">Godaddy</a>上购买的域名</li>
 <li>修改Github Pages对应的Repository的Setting，有填写绑定域名的地方</li>
-<li>修改域名的DNS配置<br><strong> 新增/修改一条Type为A的记录，使其Name为@，value为192.30.252.153
-</strong> 新增/修改一条Type为CNAME的记录，使其Name为WWW，value为你的Github Pages的地址</li>
+<li>修改域名的DNS配置<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">新增/修改一条Type为A的记录，使其Name为@，value为192.30.252.153</span><br><span class="line">新增/修改一条Type为CNAME的记录，使其Name为www，value为你的Github Pages的地址，例如ding-guohang.github.io</span><br></pre></td></tr></table></figure>
+</li>
 </ul>
 <h1 id="博客更新"><a href="#博客更新" class="headerlink" title="博客更新"></a>博客更新</h1><ul>
 <li>在code分支上进行更新<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hexo generate (hexo g) </span><br><span class="line">hexo deploy (hexo d)</span><br></pre></td></tr></table></figure>
