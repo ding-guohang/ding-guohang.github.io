@@ -88,7 +88,7 @@
 <meta property="og:site_name" content="Carry CA">
 <meta property="og:description" content="关于我如何搭建了自己的个人博客，以及遇到的一些奇怪的问题。resources: hexo中文官网 &amp;amp; next主题中文官网">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-01-09T05:58:30.435Z">
+<meta property="og:updated_time" content="2018-01-09T06:11:52.237Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="个人博客搭建">
 <meta name="twitter:description" content="关于我如何搭建了自己的个人博客，以及遇到的一些奇怪的问题。resources: hexo中文官网 &amp;amp; next主题中文官网">
@@ -377,7 +377,7 @@
 </li>
 </ul>
 <h2 id="Theme"><a href="#Theme" class="headerlink" title="Theme"></a>Theme</h2><blockquote>
-<p>在 Hexo 中有两份主要的配置文件，其名称都是 _config.yml。 其中，一份位于站点根目录下，主要包含 Hexo 本身的配置；另一份位于主题目录下，这份配置由主题作者提供，主要用于配置主题相关的选项。<br>为了描述方便，在以下说明中，将前者称为 站点配置文件， 后者称为 主题配置文件。</p>
+<p><em>在 Hexo 中有两份主要的配置文件，其名称都是 _config.yml。 其中，一份位于站点根目录下，主要包含 Hexo 本身的配置；另一份位于主题目录下，这份配置由主题作者提供，主要用于配置主题相关的选项。</em><br><em>为了描述方便，在以下说明中，将前者称为 站点配置文件， 后者称为 主题配置文件。</em></p>
 </blockquote>
 <ul>
 <li>主题在<a href="https://hexo.io/themes/" target="_blank" rel="noopener">官网</a>就有很多选择</li>
@@ -414,6 +414,14 @@
 <h1 id="Sitemap-amp-RSS"><a href="#Sitemap-amp-RSS" class="headerlink" title="Sitemap &amp; RSS"></a>Sitemap &amp; RSS</h1><ul>
 <li>也可以手动在主题配置文件中修改rss的值<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-generator-feed</span><br><span class="line">npm install hexo-generator-sitemap</span><br></pre></td></tr></table></figure>
 </li>
+</ul>
+<h1 id="一些建议"><a href="#一些建议" class="headerlink" title="一些建议"></a>一些建议</h1><ul>
+<li>有一点发自肺腑的建议要告诉大家</li>
+<li>一定做好备份</li>
+<li>尤其是主题配置文件</li>
+<li>没错，我就是没事儿瞎搞，搞ci了没法恢复，又没有备份，只能重新一点点配置的那个可怜虫</li>
+<li>我是在source下新建了一个backup目录，每次修改之后把要备份的文件同步过来，然后扔到github保存，以后可能会搞个脚本自动同步吧</li>
+<li>这是因为主题是从github克隆下来的，所以它并不能被你提交到你的github上。我建议大佬也可以尝试修改next的.git/config文件，把他搞到自己的仓库上，如果你不准备更新的话</li>
 </ul>
 
       
@@ -632,7 +640,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前情提要"><span class="nav-number">1.</span> <span class="nav-text">前情提要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#搭建Hexo"><span class="nav-number">2.</span> <span class="nav-text">搭建Hexo</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Nodejs"><span class="nav-number">2.1.</span> <span class="nav-text">Nodejs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hexo"><span class="nav-number">2.2.</span> <span class="nav-text">Hexo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Theme"><span class="nav-number">2.3.</span> <span class="nav-text">Theme</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Github-Pages"><span class="nav-number">3.</span> <span class="nav-text">Github Pages</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#绑定域名"><span class="nav-number">4.</span> <span class="nav-text">绑定域名</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#博客更新"><span class="nav-number">5.</span> <span class="nav-text">博客更新</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Sitemap-amp-RSS"><span class="nav-number">6.</span> <span class="nav-text">Sitemap &amp; RSS</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前情提要"><span class="nav-number">1.</span> <span class="nav-text">前情提要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#搭建Hexo"><span class="nav-number">2.</span> <span class="nav-text">搭建Hexo</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Nodejs"><span class="nav-number">2.1.</span> <span class="nav-text">Nodejs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hexo"><span class="nav-number">2.2.</span> <span class="nav-text">Hexo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Theme"><span class="nav-number">2.3.</span> <span class="nav-text">Theme</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Github-Pages"><span class="nav-number">3.</span> <span class="nav-text">Github Pages</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#绑定域名"><span class="nav-number">4.</span> <span class="nav-text">绑定域名</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#博客更新"><span class="nav-number">5.</span> <span class="nav-text">博客更新</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Sitemap-amp-RSS"><span class="nav-number">6.</span> <span class="nav-text">Sitemap &amp; RSS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#一些建议"><span class="nav-number">7.</span> <span class="nav-text">一些建议</span></a></li></ol></div>
             
 
           </div>
