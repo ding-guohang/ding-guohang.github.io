@@ -89,3 +89,12 @@ git push --set-upstream origin code
 hexo generate (hexo g) 
 hexo deploy (hexo d)
 ```
+
+# Sitemap & RSS
+
+* 也可以手动在主题配置文件中修改rss的值
+```bash
+npm install hexo-generator-feed
+npm install hexo-generator-sitemap
+```
+
