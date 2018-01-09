@@ -38,9 +38,9 @@ hexo server #启动本地服务器, 默认端口4000, 因此可以在(localhost:
 * 我懒，就使用了最常见的[Next](http://theme-next.iissnan.com/)
 * 直接git clone下来某个主题，并放到MyBlog/themes目录下
 * 在站点配置文件中找到themes关键字，并修改为next
-```
+```bash
 #克隆最新版本
-cd MyBlog  #进入我的博客目录
+cd ~/MyBlog  #进入我的博客目录
 git clone https://github.com/theme-next/hexo-theme-next.git themes/next
 
 #修改主题配置文件
@@ -51,12 +51,12 @@ theme: next
 # Github Pages
 
 * 安装插件
-```
+```bash
 npm install hexo-deployer-git --save
 ```
 
 * 修改站点配置文件，将功能部署在master分支
-```
+``bash`
 deploy:
   type: git
   repo: https://github.com/ding-guohang/ding-guohang.github.io.git
@@ -64,13 +64,13 @@ deploy:
 ```
 
 * 建议将源码保留在另一个分支，例如code
-···
+```bash
 git init
 git checkout -b code
 git add .
 git commit -m "init code branch for codes"
 git push --set-upstream origin code
-···
+```
 
 
 # 绑定域名
@@ -78,9 +78,20 @@ git push --set-upstream origin code
 * 我是学前辈在[Godaddy](https://www.godaddy.com/)上购买的域名
 * 修改Github Pages对应的Repository的Setting，有填写绑定域名的地方
 * 修改域名的DNS配置
-** 新增/修改一条Type为A的记录，使其Name为@，value为192.30.252.153
-** 新增/修改一条Type为CNAME的记录，使其Name为WWW，value为你的Github Pages的地址
-
+```
+新增/修改一条Type为A的记录，使其Name为@，value为192.30.252.153
+新增/修改一条Type为CNAME的记录，使其Name为www，value为你的Github Pages的地址，例如ding-guohang.github.io
+```
+* 事实上这还是不够的，如果你仔细观察就会发现，当你在github上配置了域名之后，你的master分支上增加了一个叫CNAME的文件，内容只有一行，就是你配置的域名，例如
+```bash
+www.carryca.com
+```
+* 但是每次你hexo g/d 都会更新master的代码，就需要重新在github上进行配置。因此推荐在当前分支(例如我的code)下，增加CNAME文件
+```bash
+cd ~/MyBlog/source  #前文已经提到，我的博客目录在~/MyBlog
+touch CNAME
+vim CNAME  #编辑内容并保存退出
+```
 
 # 博客更新
 
