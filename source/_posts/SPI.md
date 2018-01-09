@@ -45,11 +45,11 @@ the *SPI* is the description of classes/interfaces/methods/... that you +extend 
 
 ### *deference between SPI and API*
 
-![API and SPI](/img/SPIandAPI.jpg)
+{% cq %} ![API and SPI](/img/SPIandAPI.png) {% endcq %}
 
 ### *example for SPI and API as JNDI*
 
-![SPI](/img/SPI.jpg)
+{% cq %} ![SPI](/img/SPI.png) {% endcq %}
 
 
 ## JDK的SPI加载类
