@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="限流,redis," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Carry CA" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="lua脚本 + redis，实现滑动窗口用于限流">
+<meta name="keywords" content="限流,redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="滑动窗口的redis+lua实现">
+<meta property="og:url" content="http://www.carryca.com/2017/12/slidingWindow/index.html">
+<meta property="og:site_name" content="Carry CA">
+<meta property="og:description" content="lua脚本 + redis，实现滑动窗口用于限流">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-01-08T11:25:26.639Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="滑动窗口的redis+lua实现">
+<meta name="twitter:description" content="lua脚本 + redis，实现滑动窗口用于限流">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://www.carryca.com/2017/12/slidingWindow/"/>
+
+
+
+
+
+  <title>滑动窗口的redis+lua实现 | Carry CA</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Carry CA</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">I'll try</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.carryca.com/2017/12/slidingWindow/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丁国航">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Carry CA">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">滑动窗口的redis+lua实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-24T03:07:29+08:00">
+                2017-12-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/12/slidingWindow/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/12/slidingWindow/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>lua脚本 + redis，实现滑动窗口用于限流<br><a id="more"></a></p>
+<blockquote>
+<p>每个key，在redis中是一个table<br>这个table中记录了多个block的count值， key就是 cnt0, cnt1, … cnt99 假设100个block</p>
+</blockquote>
+<h1 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h1><p>计算当前时间所在的block， 计算上一个block<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (时间差已经超过一个duration) &#123;</span><br><span class="line">	全部清空, 重新计数</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> (当前block &gt; 上一个block) &#123;</span><br><span class="line">		说明两个block中间的block，全部是之前的值，属于无效值，清除掉之后剩下的总数，就是当  前总流量</span><br><span class="line">	&#125;    </span><br><span class="line">        <span class="keyword">if</span> (当前block &lt; 上一个block) &#123;</span><br><span class="line">                 说明绕了一圈了，上一个block到最后和<span class="number">0</span>到当前block的值，是无效值</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其实这个算法，可以通过两份空间，来减少时间上的阻塞<br>但是因为redis执行lua脚本，本身就是原子的，所以双份空间毫无价值</p>
+<h1 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h1><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- KEYS[1] map key</span></span><br><span class="line"><span class="comment">-- ARGV[1] current time</span></span><br><span class="line"><span class="comment">-- ARGV[2] duration  窗口总长度</span></span><br><span class="line"><span class="comment">-- ARGV[3] limitation  限流数量</span></span><br><span class="line"><span class="comment">-- ARGV[4] precision  限流精度  duration / 窗口数量10 / 100 * 100  </span></span><br><span class="line"><span class="comment">-- ARGV[5] permits  操作增量 1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">clear</span><span class="params">(i1, i2, key, count_key, dele)</span></span></span><br><span class="line">    <span class="keyword">local</span> sum = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> id = i1, i2 <span class="keyword">do</span></span><br><span class="line">        <span class="keyword">local</span> bkey = count_key .. <span class="string">":"</span> .. id;    <span class="comment">-- .. 是字符串拼接的意思</span></span><br><span class="line">        <span class="keyword">local</span> bcount = redis.call(<span class="string">'HGET'</span>, key, bkey)    <span class="comment">-- 取出每个block的count值，并累加</span></span><br><span class="line">        <span class="keyword">if</span> bcount <span class="keyword">then</span></span><br><span class="line">            sum = sum + <span class="built_in">tonumber</span>(bcount)</span><br><span class="line">            <span class="built_in">table</span>.<span class="built_in">insert</span>(dele, bkey)    <span class="comment">--  往dele表的末尾插入这些key干啥</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">return</span> sum</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">local</span> count_key = <span class="string">"cnt"</span> <span class="comment">-- count</span></span><br><span class="line"><span class="keyword">local</span> ts_key = <span class="string">"ts"</span> <span class="comment">-- timestamp</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">local</span> key = KEYS[<span class="number">1</span>]</span><br><span class="line"><span class="keyword">local</span> now = <span class="built_in">tonumber</span>(ARGV[<span class="number">1</span>])  <span class="comment">-- 1513498680  2017/12/17 16:18:00</span></span><br><span class="line"><span class="keyword">local</span> duration = <span class="built_in">tonumber</span>(ARGV[<span class="number">2</span>])</span><br><span class="line"><span class="keyword">local</span> limit = <span class="built_in">tonumber</span>(ARGV[<span class="number">3</span>])</span><br><span class="line"><span class="keyword">local</span> precision = <span class="built_in">tonumber</span>(ARGV[<span class="number">4</span>])</span><br><span class="line"><span class="keyword">local</span> permits = <span class="built_in">tonumber</span>(ARGV[<span class="number">5</span>])</span><br><span class="line"></span><br><span class="line"><span class="keyword">local</span> blocks = <span class="built_in">math</span>.<span class="built_in">ceil</span>(duration / precision)  <span class="comment">-- 窗口数量 * 100 * 100 这是什么鬼, 会不是默认每个窗口还分为了1w份</span></span><br><span class="line"><span class="keyword">local</span> block_id = <span class="built_in">math</span>.<span class="built_in">floor</span>(now / precision) % blocks</span><br><span class="line"><span class="keyword">local</span> last_ts = redis.call(<span class="string">'HGET'</span>, key, ts_key)  <span class="comment">-- hget table field, 所以每个限流的key，是redis中的一个hash表</span></span><br><span class="line">last_ts = last_ts <span class="keyword">and</span> <span class="built_in">tonumber</span>(last_ts) <span class="keyword">or</span> <span class="number">0</span> <span class="comment">-- 上一次的时间戳</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 这个大的if 是计算是否超过limit的</span></span><br><span class="line"><span class="keyword">if</span> last_ts ~= <span class="number">0</span> <span class="keyword">then</span></span><br><span class="line">    <span class="keyword">local</span> decr = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">local</span> dele = &#123;&#125; <span class="comment">-- 创建一个空表</span></span><br><span class="line">    <span class="keyword">local</span> last_id = <span class="built_in">math</span>.<span class="built_in">floor</span>(last_ts / i) % blocks  <span class="comment">-- 不知道这个i是啥，所以我也不知道这个last_id有啥用，但是我猜测应该是上一次落到的block</span></span><br><span class="line">    <span class="keyword">local</span> elapsed = now - last_ts;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> elapsed &gt;= duration <span class="keyword">then</span> <span class="comment">-- 已经是一个新的限流范围了</span></span><br><span class="line">        <span class="comment">-- clear all</span></span><br><span class="line">        clear(<span class="number">0</span>, blocks - <span class="number">1</span>, key, count_key, dele)</span><br><span class="line">        <span class="keyword">if</span> permits &gt; <span class="number">0</span> <span class="keyword">then</span></span><br><span class="line">            redis.call(<span class="string">'HSET'</span>, key, ts_key, now)</span><br><span class="line">            redis.call(<span class="string">'HINCRBY'</span>, key, count_key, permits)  <span class="comment">--  总量</span></span><br><span class="line">            redis.call(<span class="string">'HINCRBY'</span>, key, count_key .. <span class="string">":"</span> .. block_id, permits) <span class="comment">-- 某个block的量</span></span><br><span class="line">            redis.call(<span class="string">'PEXPIRE'</span>, key, duration)</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">    <span class="keyword">elseif</span> block_id &gt; last_id <span class="keyword">then</span></span><br><span class="line">        decr = decr + clear(last_id + <span class="number">1</span>, block_id, key, count_key, dele)  <span class="comment">-- 已经过期的值</span></span><br><span class="line">    <span class="keyword">elseif</span> block_id &lt; last_id <span class="keyword">then</span></span><br><span class="line">        decr = decr + clear(<span class="number">0</span>, block_id, key, count_key, dele)</span><br><span class="line">        decr = decr + clear(last_id + <span class="number">1</span>, blocks - <span class="number">1</span>, key, count_key, dele)</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">local</span> cur</span><br><span class="line">    <span class="keyword">if</span> #dele &gt; <span class="number">0</span> <span class="keyword">then</span> <span class="comment">-- dele 不为空</span></span><br><span class="line">        redis.call(<span class="string">'HDEL'</span>, key, <span class="built_in">unpack</span>(dele)) <span class="comment">-- unpack 返回dele中所有值, 这里是删除这个表中所有失效的block</span></span><br><span class="line">        cur = redis.call(<span class="string">'HINCRBY'</span>, key, count_key, -decr)  <span class="comment">-- 总量减去过期的数据</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        cur = redis.call(<span class="string">'HGET'</span>, key, count_key)</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">tonumber</span>(cur <span class="keyword">or</span> <span class="string">'0'</span>) + permits &gt; limit <span class="keyword">then</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 这个if是增量的</span></span><br><span class="line"><span class="keyword">if</span> permits &gt; <span class="number">0</span> <span class="keyword">then</span></span><br><span class="line">    redis.call(<span class="string">'HSET'</span>, key, ts_key, now)</span><br><span class="line">    redis.call(<span class="string">'HINCRBY'</span>, key, count_key, permits)  <span class="comment">-- H incr by</span></span><br><span class="line">    redis.call(<span class="string">'HINCRBY'</span>, key, count_key .. <span class="string">":"</span> .. block_id, permits)</span><br><span class="line">    redis.call(<span class="string">'PEXPIRE'</span>, key, duration)</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"><span class="keyword">return</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>喜欢的大佬，路过赏点儿呗～</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/img/wechatpay.jpeg" alt="丁国航 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/img/alipay.jpeg" alt="丁国航 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/限流/" rel="tag"># 限流</a>
+          
+            <a href="/tags/redis/" rel="tag"># redis</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/kafkaNote1/" rel="next" title="Kafka Note One: 初次见面, 请多关照">
+                <i class="fa fa-chevron-left"></i> Kafka Note One: 初次见面, 请多关照
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/initBlog/" rel="prev" title="个人博客搭建">
+                个人博客搭建 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/img/avatar.jpg"
+                alt="丁国航" />
+            
+              <p class="site-author-name" itemprop="name">丁国航</p>
+              <p class="site-description motion-element" itemprop="description">和世界交手的这许多年 <br>你是否光彩依旧，兴致盎然</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ding-guohang" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#算法"><span class="nav-number">1.</span> <span class="nav-text">算法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#脚本"><span class="nav-number">2.</span> <span class="nav-text">脚本</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">丁国航</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: '8rbRtsYzM2RWeQzhWw7au58O-gzGzoHsz',
+        appKey: '0f1PmfMffrCytKrHHNT8hrPJ',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

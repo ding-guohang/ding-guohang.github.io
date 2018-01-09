@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="MQ,Kafka," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Carry CA" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="这是我对于kafka的学习过程中的一些笔记，可能大多数的信息来源于官方网站的翻译，以及网上的其他blog。也许会参杂着一些自己的思考和认知，如果你需要一个入门、基础知识的快速阅览，也许会适合你。resources: infoQ &amp;amp; kafka官网">
+<meta name="keywords" content="MQ,Kafka">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka Note One: 初次见面, 请多关照">
+<meta property="og:url" content="http://www.carryca.com/2017/12/kafkaNote1/index.html">
+<meta property="og:site_name" content="Carry CA">
+<meta property="og:description" content="这是我对于kafka的学习过程中的一些笔记，可能大多数的信息来源于官方网站的翻译，以及网上的其他blog。也许会参杂着一些自己的思考和认知，如果你需要一个入门、基础知识的快速阅览，也许会适合你。resources: infoQ &amp;amp; kafka官网">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://www.carryca.com/img/anatomy%20of%20topic.png">
+<meta property="og:image" content="http://www.carryca.com/img/partition.png">
+<meta property="og:image" content="http://www.carryca.com/img/consumer%20and%20provider.png">
+<meta property="og:image" content="http://www.carryca.com/img/consumer-groups.png">
+<meta property="og:updated_time" content="2017-12-23T18:22:22.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kafka Note One: 初次见面, 请多关照">
+<meta name="twitter:description" content="这是我对于kafka的学习过程中的一些笔记，可能大多数的信息来源于官方网站的翻译，以及网上的其他blog。也许会参杂着一些自己的思考和认知，如果你需要一个入门、基础知识的快速阅览，也许会适合你。resources: infoQ &amp;amp; kafka官网">
+<meta name="twitter:image" content="http://www.carryca.com/img/anatomy%20of%20topic.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://www.carryca.com/2017/12/kafkaNote1/"/>
+
+
+
+
+
+  <title>Kafka Note One: 初次见面, 请多关照 | Carry CA</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Carry CA</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">I'll try</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.carryca.com/2017/12/kafkaNote1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="丁国航">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Carry CA">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kafka Note One: 初次见面, 请多关照</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-23T21:03:54+08:00">
+                2017-12-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/12/kafkaNote1/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/12/kafkaNote1/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><em>这是我对于kafka的学习过程中的一些笔记，可能大多数的信息来源于官方网站的翻译，以及网上的其他blog。</em><br><em>也许会参杂着一些自己的思考和认知，如果你需要一个入门、基础知识的快速阅览，也许会适合你。</em><br><em>resources: <a href="http://www.infoq.com/cn/articles/kafka-analysis-part-1/" target="_blank" rel="noopener">infoQ</a> &amp; <a href="http://kafka.apache.org/" target="_blank" rel="noopener">kafka官网</a></em><br><a id="more"></a></p>
+<h1 id="Topic"><a href="#Topic" class="headerlink" title="Topic"></a>Topic</h1><ul>
+<li>Topic, 也可以被成为subject, 发布-订阅模型中的消息主题</li>
+<li>不同的Topic在物理上分开存储</li>
+</ul>
+<h1 id="Partition"><a href="#Partition" class="headerlink" title="Partition"></a>Partition</h1><blockquote class="blockquote-center"><p>For each topic, the Kafka cluster maintains a partitioned log </p>
+</blockquote>
+<ul>
+<li>一种物理上的概念, 每个Partition在物理上对应一个文件夹，文件夹下存放的是这个Partition的所有消息和索引文件</li>
+<li>Partition内的消息是有序的</li>
+<li>这更像是一个日志文件，和对应的多个索引</li>
+</ul>
+<h2 id="一个Topic，被分为多个Partition"><a href="#一个Topic，被分为多个Partition" class="headerlink" title="一个Topic，被分为多个Partition"></a>一个Topic，被分为多个Partition</h2><p><img src="/img/anatomy of topic.png" alt="anatomy of topic"></p>
+<ul>
+<li>减小日志文件大小，让服务器可以承担</li>
+<li>多个partition可以被并行消费</li>
+</ul>
+<h2 id="一个Partition里的日志文件，被分为多个Segment"><a href="#一个Partition里的日志文件，被分为多个Segment" class="headerlink" title="一个Partition里的日志文件，被分为多个Segment"></a>一个Partition里的日志文件，被分为多个Segment</h2><p><img src="/img/partition.png" alt=""></p>
+<ul>
+<li>每个日志，或者说每个消息，都具备自己在partition中的一个64byte的唯一offset，而且每个partition是有序的</li>
+<li>每个Segment以自己包含的第一条消息的offset + “.kafka” 命名</li>
+<li>有一个索引文件，表明了每个segment下包含的log的offset范围<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">日志的组成</span><br><span class="line">message length ： 4 bytes (value: 1+4+n)</span><br><span class="line">&quot;magic&quot; value ： 1 byte </span><br><span class="line">CRC 校验码 ： 4 bytes </span><br><span class="line">消息内容 ： n bytes</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="消息的读取是O-1-的（这句话待求证）"><a href="#消息的读取是O-1-的（这句话待求证）" class="headerlink" title="消息的读取是O(1)的（这句话待求证）"></a>消息的读取是O(1)的（这句话待求证）</h2><blockquote class="blockquote-center"><p>Kafka’s performance is effectively constant with respect to data size so storing data for a long time is not a problem </p>
+</blockquote>
+<ul>
+<li>Kafka会保留所有的消息，与是否被消费无关</li>
+<li>可以指定删除旧数据的策略， 时间/partition文件大小</li>
+<li>文件的大小和多少，不会影响kafka的性能</li>
+</ul>
+<p><img src="/img/consumer and provider.png" alt=""></p>
+<h2 id="Consumer保存自己消费的offset，consumer之间互不影响"><a href="#Consumer保存自己消费的offset，consumer之间互不影响" class="headerlink" title="Consumer保存自己消费的offset，consumer之间互不影响"></a>Consumer保存自己消费的offset，consumer之间互不影响</h2><ul>
+<li>因此kafka的broker是无状态的，也不需要锁</li>
+<li>consumer可以通过修改自己的offset达到重新消费消息的效果</li>
+<li>consumer去broker pull消息</li>
+</ul>
+<h1 id="Producer"><a href="#Producer" class="headerlink" title="Producer"></a>Producer</h1><ul>
+<li>producer 选择自己的每一条消息记录到哪个partition中</li>
+<li>最简单的方式就是循环，可以保证负载均衡</li>
+<li>也可以通过某些消息中的某些元素自定义</li>
+</ul>
+<h1 id="Consumer"><a href="#Consumer" class="headerlink" title="Consumer"></a>Consumer</h1><blockquote class="blockquote-center"><p>The way consumption is implemented in Kafka is by dividing up the partitions in the log over the consumer instances so that each instance is the exclusive consumer of a “fair share” of partitions at any point in time </p>
+</blockquote>
+<p><img src="/img/consumer-groups.png" alt=""></p>
+<ul>
+<li>consumer有group的概念，一个group的所有实例，一起消费相同的topic</li>
+<li>每个消息只会被交付给consumer group中的一个实例</li>
+<li>kafka 关于这个的实现方式是将 partition划分到消费者实例上，使得在任何时间点上，每个实例都是将partitions公平分享的独占消费者</li>
+<li>关于这一点，newQMQ就有刻意的区别实现，做了动态的关联</li>
+<li>这个对应关系，是由kafka的协议动态维护的，所以任何消费者实例的变化，都会导致对应关系的变化</li>
+<li>不需要区分订阅或是广播，所有消息都是订阅，如果每个consumer有独一无二的group，就是广播</li>
+<li>kafka只保证每个partition有序，不保证多个partition的顺序，所以整体来说，其实是不保证消息有序的，如果想要整体顺序消费，那么只能通过一个partitoon的方式实现，这样带来的后果是也只会有一个consumer消费消息</li>
+<li>关于这一点，newQMQ也有做一些特殊的处理，如果真的想要强顺序的话，貌似是可以实现的，虽然不知道效果是不是和这个一样</li>
+</ul>
+<h1 id="Fault-Tolerance"><a href="#Fault-Tolerance" class="headerlink" title="Fault Tolerance"></a>Fault Tolerance</h1><ul>
+<li>partition 分布在kafka的集群上，每个server处理数据并请求共享分区，每个 partition 被复制在多个(可配)服务器上以实现容错</li>
+<li>每个 partition 有一个server是leader，0或多个followers</li>
+<li>leader处理读写请求，其他followers被动复制</li>
+<li>leader挂了，某个followers自动变为leader</li>
+<li>每个server都扮演一些 partition 的leader，和另一些的follower，因此load在集群中很平衡</li>
+<li>当然，以此推论，如果只有一个server，则独自扮演所有topic的所有partition的leader，并且没有follower</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>喜欢的大佬，路过赏点儿呗～</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/img/wechatpay.jpeg" alt="丁国航 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/img/alipay.jpeg" alt="丁国航 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/MQ/" rel="tag"># MQ</a>
+          
+            <a href="/tags/Kafka/" rel="tag"># Kafka</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/slidingWindow/" rel="prev" title="滑动窗口的redis+lua实现">
+                滑动窗口的redis+lua实现 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/img/avatar.jpg"
+                alt="丁国航" />
+            
+              <p class="site-author-name" itemprop="name">丁国航</p>
+              <p class="site-description motion-element" itemprop="description">和世界交手的这许多年 <br>你是否光彩依旧，兴致盎然</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ding-guohang" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Topic"><span class="nav-number">1.</span> <span class="nav-text">Topic</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Partition"><span class="nav-number">2.</span> <span class="nav-text">Partition</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#一个Topic，被分为多个Partition"><span class="nav-number">2.1.</span> <span class="nav-text">一个Topic，被分为多个Partition</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一个Partition里的日志文件，被分为多个Segment"><span class="nav-number">2.2.</span> <span class="nav-text">一个Partition里的日志文件，被分为多个Segment</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息的读取是O-1-的（这句话待求证）"><span class="nav-number">2.3.</span> <span class="nav-text">消息的读取是O(1)的（这句话待求证）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Consumer保存自己消费的offset，consumer之间互不影响"><span class="nav-number">2.4.</span> <span class="nav-text">Consumer保存自己消费的offset，consumer之间互不影响</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Producer"><span class="nav-number">3.</span> <span class="nav-text">Producer</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Consumer"><span class="nav-number">4.</span> <span class="nav-text">Consumer</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Fault-Tolerance"><span class="nav-number">5.</span> <span class="nav-text">Fault Tolerance</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">丁国航</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: '8rbRtsYzM2RWeQzhWw7au58O-gzGzoHsz',
+        appKey: '0f1PmfMffrCytKrHHNT8hrPJ',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
