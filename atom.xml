@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.carryca.com/"/>
-  <updated>2018-01-09T08:27:00.795Z</updated>
+  <updated>2018-01-11T15:29:29.566Z</updated>
   <id>http://www.carryca.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>String#intern</title>
+    <link href="http://www.carryca.com/2018/01/String-intern/"/>
+    <id>http://www.carryca.com/2018/01/String-intern/</id>
+    <published>2018-01-10T03:40:51.000Z</published>
+    <updated>2018-01-11T15:29:29.566Z</updated>
+    
+    <content type="html"><![CDATA[<p><em>String#inter()是什么？</em><br><em>它在jdk6-7-8中是否有什么区别呢？</em><br><em>应该使用或是如何呢？</em><br><em>这是一个秘密</em></p><p>未完待续<br><a id="more"></a></p><h1 id="Talk-is-cheap-show-me-the-code"><a href="#Talk-is-cheap-show-me-the-code" class="headerlink" title="Talk is cheap, show me the code"></a>Talk is cheap, show me the code</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    String s1 = <span class="keyword">new</span> StringBuilder(<span class="string">"计算机"</span>).append(<span class="string">"软件"</span>).toString();</span><br><span class="line">    String s2 = <span class="keyword">new</span> StringBuilder(<span class="string">"ja"</span>).append(<span class="string">"va"</span>).toString();</span><br><span class="line"></span><br><span class="line">    System.out.println(<span class="string">"Answer One: "</span> + s1 == s1.intern());</span><br><span class="line">    System.out.println(<span class="string">"Answer Two: "</span> + s2 == s2.intern());</span><br><span class="line"></span><br><span class="line">    System.out.println(<span class="string">"Answer Three: "</span> + <span class="string">"计算机麻烦呀"</span> == <span class="string">"计算机麻烦呀"</span>.intern());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h1 id="Console"><a href="#Console" class="headerlink" title="Console"></a>Console</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># in jdk6</span></span><br><span class="line">Answer One: <span class="literal">false</span></span><br><span class="line">Answer Two: <span class="literal">false</span></span><br><span class="line">Answer Three: <span class="literal">true</span> ? 这个还需要回去在jdk6上验证一下</span><br><span class="line"></span><br><span class="line"><span class="comment"># in jdk7+</span></span><br><span class="line">Answer One: <span class="literal">true</span></span><br><span class="line">Answer Two: <span class="literal">false</span></span><br><span class="line">Answer Three: <span class="literal">true</span></span><br></pre></td></tr></table></figure><h1 id="Infomation"><a href="#Infomation" class="headerlink" title="Infomation"></a>Infomation</h1>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;em&gt;String#inter()是什么？&lt;/em&gt;&lt;br&gt;&lt;em&gt;它在jdk6-7-8中是否有什么区别呢？&lt;/em&gt;&lt;br&gt;&lt;em&gt;应该使用或是如何呢？&lt;/em&gt;&lt;br&gt;&lt;em&gt;这是一个秘密&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;未完待续&lt;br&gt;
+    
+    </summary>
+    
+      <category term="一些有趣的问题" scheme="http://www.carryca.com/categories/%E4%B8%80%E4%BA%9B%E6%9C%89%E8%B6%A3%E7%9A%84%E9%97%AE%E9%A2%98/"/>
+    
+    
+      <category term="String" scheme="http://www.carryca.com/tags/String/"/>
+    
+      <category term="jdk" scheme="http://www.carryca.com/tags/jdk/"/>
+    
+  </entry>
   
   <entry>
     <title>hashCode</title>
@@ -34,9 +59,9 @@
       <category term="一些有趣的问题" scheme="http://www.carryca.com/categories/%E4%B8%80%E4%BA%9B%E6%9C%89%E8%B6%A3%E7%9A%84%E9%97%AE%E9%A2%98/"/>
     
     
-      <category term="hashCode" scheme="http://www.carryca.com/tags/hashCode/"/>
-    
       <category term="jdk" scheme="http://www.carryca.com/tags/jdk/"/>
+    
+      <category term="hashCode" scheme="http://www.carryca.com/tags/hashCode/"/>
     
   </entry>
   
